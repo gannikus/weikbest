@@ -1,0 +1,94 @@
+package ${package.ServiceImpl};
+
+import ${package.Parent}.${packageQO}.${entity}QO;
+import ${package.Parent}.${packageDTO}.${entity}DTO;
+import ${package.Parent}.${packageMapstruct}.${entity}MapStruct;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.weikbest.pro.${projectName}.common.transfervo.req.base.PageReq;
+import com.weikbest.pro.${projectName}.common.transfervo.resp.ResultConstant;
+import com.weikbest.pro.${projectName}.common.exception.WeikbestException;
+import ${package.Entity}.${entity};
+import ${package.Mapper}.${table.mapperName};
+import ${package.Service}.${table.serviceName};
+import ${superServiceImplClassPackage};
+import org.springframework.stereotype.Service;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+
+import java.util.List;
+
+/**
+ * <p>
+ * $!{table.comment} 服务实现类
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@Service
+#if(${kotlin})
+open class ${table.serviceImplName} : ${superServiceImplClass}<${table.mapperName}, ${entity}>(), ${table.serviceName} {
+
+        }
+#else
+        public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.mapperName}, ${entity}>implements ${table.serviceName} {
+
+    #set( $lowerCaseEntity = $entity.substring(0,1).toLowerCase() + $entity.substring(1) )
+        @Override
+        public boolean insert(${entity}DTO ${lowerCaseEntity}DTO){
+    ${entity} ${lowerCaseEntity} = ${entity}MapStruct.INSTANCE.converToEntity(${lowerCaseEntity}DTO);
+        return this.save(${lowerCaseEntity});
+        }
+
+        @Override
+        public boolean updateById(Long id, ${entity}DTO ${lowerCaseEntity}DTO){
+    ${entity} ${lowerCaseEntity} =this.findById(id);
+    ${entity}MapStruct.INSTANCE.copyProperties(${lowerCaseEntity}DTO, ${lowerCaseEntity});
+    ${lowerCaseEntity}.setId(id);
+        return this.updateById(${lowerCaseEntity});
+        }
+
+        @Override
+        public boolean deleteBatchByIds(List<Long>ids){
+        return this.removeBatchByIds(ids);
+        }
+
+        @Override
+        public ${entity} findById(Long id){
+    ${entity} ${lowerCaseEntity} =this.getById(id);
+        if(ObjectUtil.isNull(${lowerCaseEntity})){
+        throw new WeikbestException(ResultConstant.DATA_NOT_FOUND);
+        }
+        return ${lowerCaseEntity};
+        }
+
+        @Override
+        public IPage<${entity}>queryPage(${entity}QO ${lowerCaseEntity}QO,PageReq pageReq){
+        QueryWrapper<${entity}>wrapper=new QueryWrapper<>();
+    #foreach($field in ${table.fields})
+        #if(${field.keyFlag}) ## 主键
+        #elseif(${field.fill}) ## 填充字段
+        #else
+            #if(${field.versionField}) ## 乐观锁注解
+            #elseif(${field.logicDeleteField}) ## 逻辑删除注解
+            #else
+                #if("$!field.propertyName" == "creator")
+                #elseif("$!field.propertyName" == "modifier")
+                #else
+                    #if("$!field.propertyType" == "String")
+                            if(StrUtil.isNotBlank(${lowerCaseEntity}QO.get${field.capitalName}())){
+                            wrapper.eq(${entity}.${field.name.toUpperCase()}, ${lowerCaseEntity}QO.get${field.capitalName}());
+                            }
+                    #elseif("$!field.propertyType" == "Long")
+                    #else
+                    #end
+                #end
+            #end
+        #end
+    #end
+        return this.page(new Page<>(pageReq.getPage(),pageReq.getLimit()),wrapper);
+        }
+        }
+#end

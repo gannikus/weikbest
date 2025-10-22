@@ -1,0 +1,50 @@
+package ${package.Parent}.${packageMapstruct};
+
+import com.weikbest.pro.${projectName}.common.mapstruct.BaseMapStruct;
+import ${package.Entity}.${entity};
+import ${package.Parent}.${packageVO}.${entity}VO;
+import ${package.Parent}.${packageDTO}.${entity}DTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * <p>
+ * $!{table.comment}实体转换映射
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@Mapper
+public interface ${entity}MapStruct extends BaseMapStruct {
+    #set( $lowerCaseEntity = $entity.substring(0,1).toLowerCase() + $entity.substring(1) )
+        ${entity}MapStruct INSTANCE = Mappers.getMapper(${entity}MapStruct.class);
+
+    /**
+     * entity转换为DTO
+     * @param ${lowerCaseEntity} entity
+     * @return dto
+     */
+        ${entity}DTO converToDTO(${entity} ${lowerCaseEntity});
+
+    /**
+     * DTO转换为entity
+     * @param ${lowerCaseEntity}DTO dto
+     * @return entity
+     */
+        ${entity} converToEntity(${entity}DTO ${lowerCaseEntity}DTO);
+
+    /**
+     * entity转换为VO
+     * @param ${lowerCaseEntity} entity
+     * @return vo
+     */
+        ${entity}VO converToVO(${entity} ${lowerCaseEntity});
+
+    /**
+     * VO转换为entity
+     * @param ${lowerCaseEntity}VO vo
+     * @return entity
+     */
+        ${entity} converToEntity(${entity}VO ${lowerCaseEntity}VO);
+}

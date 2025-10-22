@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sysmerchat.shop.mapper.SysShopFinanceDetailMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.sysmerchat.shop.module.vo.SysShopFinanceDetailPageVO">
+        select A.*, B.name shop_name, B.contact shop_contact, C.id order_id
+        from t_mmdm_shop_finance_detail A
+        left join t_mmdm_shop B on A.shop_id = B.id
+        left join t_mmdm_order_info C on A.number = C.number
+        where B.flag = '0'
+        <if test="sysShopFinanceDetail.number != null and sysShopFinanceDetail.number != '' ">AND A.`number`=#{sysShopFinanceDetail.number}</if>
+        <if test="sysShopFinanceDetail.wxOrderId != null and sysShopFinanceDetail.wxOrderId != '' ">AND A.`wx_order_id`=#{sysShopFinanceDetail.wxOrderId}</if>
+        <if test="sysShopFinanceDetail.financeType != null and sysShopFinanceDetail.financeType != '' ">AND A.`finance_type`=#{sysShopFinanceDetail.financeType}</if>
+        <if test="sysShopFinanceDetail.capitalFlowType != null and sysShopFinanceDetail.capitalFlowType != '' ">AND A.`capital_flow_type`=#{sysShopFinanceDetail.capitalFlowType}</if>
+        <if test="sysShopFinanceDetail.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{sysShopFinanceDetail.startDate}</if>
+        <if test="sysShopFinanceDetail.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{sysShopFinanceDetail.endDate}</if>
+        order by A.`gmt_create` desc
+    </select>
+</mapper>

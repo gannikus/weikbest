@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopFinanceDetailMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopFinanceDetailPageVO">
+        select A.*, B.name shop_name, B.contact shop_contact, C.id order_id
+        from t_mmdm_shop_finance_detail A
+        left join t_mmdm_shop B on A.shop_id = B.id
+        left join t_mmdm_order_info C on A.number = C.number
+        where B.flag = '0'
+        <if test="shopFinanceDetail.businessId != null and shopFinanceDetail.businessId != 0 ">AND B.`business_id`=#{shopFinanceDetail.businessId}</if>
+        <if test="shopFinanceDetail.shopId != null and shopFinanceDetail.shopId != 0 ">AND A.`shop_id`=#{shopFinanceDetail.shopId}</if>
+        <if test="shopFinanceDetail.financeAccountId != null and shopFinanceDetail.financeAccountId != 0 ">AND A.`finance_account_id`=#{shopFinanceDetail.financeAccountId}</if>
+        <if test="shopFinanceDetail.number != null and shopFinanceDetail.number != '' ">AND A.`number`=#{shopFinanceDetail.number}</if>
+        <if test="shopFinanceDetail.wxOrderId != null and shopFinanceDetail.wxOrderId != '' ">AND A.`wx_order_id`=#{shopFinanceDetail.wxOrderId}</if>
+        <if test="shopFinanceDetail.financeType != null and shopFinanceDetail.financeType != '' ">AND A.`finance_type`=#{shopFinanceDetail.financeType}</if>
+        <if test="shopFinanceDetail.capitalFlowType != null and shopFinanceDetail.capitalFlowType != '' ">AND A.`capital_flow_type`=#{shopFinanceDetail.capitalFlowType}</if>
+        <if test="shopFinanceDetail.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{shopFinanceDetail.startDate}</if>
+        <if test="shopFinanceDetail.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{shopFinanceDetail.endDate}</if>
+        order by A.`gmt_create` desc
+    </select>
+
+    <select id="downloadDetail"
+            resultType="com.weikbest.pro.saas.merchat.shop.module.excel.ShopFinanceDetailExcel">
+        select A.*, B.name shop_name, B.contact shop_contact
+        from t_mmdm_shop_finance_detail A
+        left join t_mmdm_shop B on A.shop_id = B.id
+        where B.flag = '0'
+        <if test="shopFinanceDetail.businessId != null and shopFinanceDetail.businessId != 0 ">AND B.`business_id`=#{shopFinanceDetail.businessId}</if>
+        <if test="shopFinanceDetail.shopId != null and shopFinanceDetail.shopId != 0 ">AND A.`shop_id`=#{shopFinanceDetail.shopId}</if>
+        <if test="shopFinanceDetail.financeAccountId != null and shopFinanceDetail.financeAccountId != 0 ">AND A.`finance_account_id`=#{shopFinanceDetail.financeAccountId}</if>
+        <if test="shopFinanceDetail.number != null and shopFinanceDetail.number != '' ">AND A.`number`=#{shopFinanceDetail.number}</if>
+        <if test="shopFinanceDetail.wxOrderId != null and shopFinanceDetail.wxOrderId != '' ">AND A.`wx_order_id`=#{shopFinanceDetail.wxOrderId}</if>
+        <if test="shopFinanceDetail.financeType != null and shopFinanceDetail.financeType != '' ">AND A.`finance_type`=#{shopFinanceDetail.financeType}</if>
+        <if test="shopFinanceDetail.capitalFlowType != null and shopFinanceDetail.capitalFlowType != '' ">AND A.`capital_flow_type`=#{shopFinanceDetail.capitalFlowType}</if>
+        <if test="shopFinanceDetail.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{shopFinanceDetail.startDate}</if>
+        <if test="shopFinanceDetail.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{shopFinanceDetail.endDate}</if>
+        order by A.`gmt_create` desc
+    </select>
+</mapper>

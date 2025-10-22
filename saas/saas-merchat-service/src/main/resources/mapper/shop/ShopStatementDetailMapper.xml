@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopStatementDetailMapper">
+
+    <select id="getPayTotalAmount" resultType="java.math.BigDecimal">
+        select SUM(pay_amount)
+        from t_mmdm_shop_statement_detail
+        where statement_type = '1'
+    </select>
+
+    <select id="getRefundTotalAmount" resultType="java.math.BigDecimal">
+        select SUM(refund_amount)
+        from t_mmdm_shop_statement_detail
+        where statement_type = '2'
+    </select>
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopStatementDetailPageVO">
+        select A.*, B.id order_id, B.order_source, B.order_path, B.order_status, B.ad_aid,
+               C.customer_name, C.customer_phone, E.apply_time order_after_sale_apply_time
+        from t_mmdm_shop_statement_detail A
+        left join t_mmdm_order_info B on A.number = B.number
+        left join t_mmdm_order_cust_info C on B.id = C.id
+        left join t_mmdm_shop D on A.shop_id = D.id
+        left join t_mmdm_order_after_sale E on B.order_after_sale_id = E.id
+        where B.flag = '0'
+        <if test="shopStatementDetail.businessId != null and shopStatementDetail.businessId != 0 ">AND D.`business_id`=#{shopStatementDetail.businessId}</if>
+        <if test="shopStatementDetail.shopId != null and shopStatementDetail.shopId != 0 ">AND A.`shop_id`=#{shopStatementDetail.shopId}</if>
+        <if test="shopStatementDetail.customerId != null and shopStatementDetail.customerId != 0 ">AND A.`customer_id`=#{shopStatementDetail.customerId}</if>
+        <if test="shopStatementDetail.statementType != null and shopStatementDetail.statementType != '' ">AND A.`statement_type`=#{shopStatementDetail.statementType}</if>
+        <if test="shopStatementDetail.number != null and shopStatementDetail.number != '' ">AND A.`number`=#{shopStatementDetail.number}</if>
+        <if test="shopStatementDetail.orderSource != null and shopStatementDetail.orderSource != '' ">AND B.`order_source`=#{shopStatementDetail.orderSource}</if>
+        <if test="shopStatementDetail.orderStatus != null and shopStatementDetail.orderStatus != '' ">AND B.`order_status`=#{shopStatementDetail.orderStatus}</if>
+        <if test="shopStatementDetail.settleType != null and shopStatementDetail.settleType != '' ">AND A.`settle_type`=#{shopStatementDetail.settleType}</if>
+        <if test="shopStatementDetail.orderStartTime != null ">AND A.`order_time` <![CDATA[ >= ]]> #{shopStatementDetail.orderStartTime}</if>
+        <if test="shopStatementDetail.orderEndTime != null ">AND A.`order_time` <![CDATA[ < ]]> #{shopStatementDetail.orderEndTime}</if>
+
+        <if test="shopStatementDetail.statementType != null and shopStatementDetail.statementType == '1'.toString() ">order by A.order_time desc</if>
+        <if test="shopStatementDetail.statementType != null and shopStatementDetail.statementType == '2'.toString() ">order by A.refund_time desc</if>
+    </select>
+
+
+</mapper>

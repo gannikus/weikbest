@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.order.mapper.OrderBatchDeliverMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.order.module.vo.OrderBatchDeliverListVO">
+        select distinct A.*
+        from t_mmdm_order_batch_deliver A
+        left join t_mmdm_order_batch_deliver_record B on A.id = B.id
+        where 1=1
+        <if test="orderBatchDeliver.businessId != null and orderBatchDeliver.businessId != 0 ">and A.business_id =
+            #{orderBatchDeliver.businessId}
+        </if>
+        <if test="orderBatchDeliver.shopId != null and orderBatchDeliver.shopId != 0 ">and A.shop_id = #{orderBatchDeliver.shopId}</if>
+        <if test="orderBatchDeliver.orderNumber != null and orderBatchDeliver.orderNumber != '' ">and B.order_number =
+            #{orderBatchDeliver.orderNumber}
+        </if>
+        <if test="orderBatchDeliver.importStatus != null and orderBatchDeliver.importStatus != '' ">and B.import_status =
+            #{orderBatchDeliver.importStatus}
+        </if>
+        <if test="orderBatchDeliver.logisticsCompanyName != null and orderBatchDeliver.logisticsCompanyName != '' ">and B.logistics_company_name like concat('%', #{orderBatchDeliver.logisticsCompanyName}, '%')
+        </if>
+        <if test="orderBatchDeliver.courierNumber != null and orderBatchDeliver.courierNumber != '' ">and B.courier_number =
+            #{orderBatchDeliver.courierNumber}
+        </if>
+        <if test="orderBatchDeliver.recordStartTime != null  ">AND A.`record_time` <![CDATA[ >= ]]>#{orderBatchDeliver.recordStartTime}
+        </if>
+        <if test="orderBatchDeliver.recordEndTime != null  ">AND A.`record_time` <![CDATA[ < ]]> #{orderBatchDeliver.recordEndTime}</if>
+        order by A.gmt_create desc
+    </select>
+</mapper>

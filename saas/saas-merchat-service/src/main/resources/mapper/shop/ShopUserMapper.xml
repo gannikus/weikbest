@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopUserMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopUserListVO">
+        select A.*, B.name, B.phone
+        from t_mmdm_shop_user A
+        left join t_mmdm_busi_user B on A.business_user_id = B.id
+        where B.flag = '0' and B.`data_status`= '1'
+        <if test="shopUser.businessId != null and shopUser.businessId != 0 ">AND
+            A.`business_id`=#{shopUser.businessId}
+        </if>
+        <if test="shopUser.shopId != null and shopUser.shopId != 0 ">AND A.`shop_id`=#{shopUser.shopId}</if>
+        <if test="shopUser.businessUserId != null and shopUser.businessUserId != 0 ">AND
+            A.`business_user_id`=#{shopUser.businessUserId}
+        </if>
+        <if test="shopUser.name != null and shopUser.name != '' ">AND B.`name` like concat('%', #{shopUser.name}, '%')
+        </if>
+        <if test="shopUser.dataStatus != null and shopUser.dataStatus != '' ">AND
+            A.`data_status`=#{shopUser.dataStatus}
+        </if>
+    </select>
+</mapper>

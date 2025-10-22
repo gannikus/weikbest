@@ -1,0 +1,67 @@
+package ${package.Service};
+
+import ${package.Parent}.${packageQO}.${entity}QO;
+import ${package.Parent}.${packageDTO}.${entity}DTO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.weikbest.pro.${projectName}.common.transfervo.req.base.PageReq;
+import ${package.Entity}.${entity};
+import ${superServiceClassPackage};
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * <p>
+ * $!{table.comment} 服务类
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${kotlin})
+interface ${table.serviceName} : ${superServiceClass}<${entity}>
+#else
+public interface ${table.serviceName} extends ${superServiceClass}<${entity}> {
+    #set( $lowerCaseEntity = $entity.substring(0,1).toLowerCase() + $entity.substring(1) )
+
+        /**
+         * 新增数据
+         *
+         * @param ${lowerCaseEntity}DTO ${lowerCaseEntity}DTO
+         * @return 新增结果
+         */
+        boolean insert(${entity}DTO ${lowerCaseEntity}DTO);
+
+        /**
+         * 更新数据
+         *
+         * @param id ID
+         * @param ${lowerCaseEntity}DTO ${lowerCaseEntity}DTO
+         * @return 更新结果
+         */
+        boolean updateById(Long id, ${entity}DTO ${lowerCaseEntity}DTO);
+
+        /**
+         * 删除数据
+         *
+         * @param ids ID集合
+         */
+        boolean deleteBatchByIds(List<Long> ids);
+
+        /**
+         * 根据ID查询
+         *
+         * @param id ID
+         * @return 查询结果
+         */
+    ${entity} findById(Long id);
+
+        /**
+         * 分页查询
+         *
+         * @param ${lowerCaseEntity}QO
+         * @param pageReq
+         * @return
+         */
+        IPage<${entity}> queryPage(${entity}QO ${lowerCaseEntity}QO,PageReq pageReq);
+        }
+#end

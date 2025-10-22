@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.complaint.mapper.OrderComplaintMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.complaint.module.vo.OrderComplaintPageVO">
+        select A.*, B.number order_number, B.pay_amount,
+        C.prod_id, C.prod_sku_id, C.prod_combo_id, C.prod_name, C.buy_number, C.prod_combo_title,
+        C.prod_combo_attr_values, C.prod_combo_price, C.prod_img,
+        E.tp_name, E.tp_photo,
+        F.pay_status, F.trading_flow, F.out_trade_no, F.refund_trade_no, F.refund_amount, F.refund_status, F.refund_time,
+        G.name shop_name, H.wx_pay_mch_id
+        from t_mmdm_order_complaint A
+        left join t_mmdm_order_info B on A.order_id = B.id
+        left join t_mmdm_order_prod_info C on A.order_id = C.id
+        left join t_mmdm_order_cust_info E on A.order_id = E.id
+        left join t_mmdm_order_pay_record F on A.order_id = F.order_id
+        left join t_mmdm_shop G on B.shop_id = G.id
+        left join t_mmdm_shop_third H on G.id = H.id
+        where A.flag = '0'
+        and B.data_status = '1' and B.flag = '0'
+        <if test="orderComplaint.number != null and orderComplaint.number != '' ">and A.number =
+            #{orderComplaint.number}
+        </if>
+        <if test="orderComplaint.businessId != null and orderComplaint.businessId != 0 ">and B.business_id =
+            #{orderComplaint.businessId}
+        </if>
+        <if test="orderComplaint.shopId != null and orderComplaint.shopId != 0 ">and B.shop_id =
+            #{orderComplaint.shopId}
+        </if>
+        <if test="orderComplaint.complaintType != null and orderComplaint.complaintType != '' ">and B.complaint_type =
+            #{orderComplaint.complaintType}
+        </if>
+        <if test="orderComplaint.orderId != null and orderComplaint.orderId != 0 ">and B.id =
+            #{orderComplaint.orderId}
+        </if>
+        <if test="orderComplaint.orderNumber != null and orderComplaint.orderNumber != '' ">and B.number =
+            #{orderComplaint.orderNumber}
+        </if>
+        <if test="orderComplaint.prodId != null and orderComplaint.prodId != 0 ">and B.prod_id =
+            #{orderComplaint.prodId}
+        </if>
+        <if test="orderComplaint.prodName != null and orderComplaint.prodName != '' ">and C.prod_name like concat('%',
+            #{orderComplaint.prodName}, '%')
+        </if>
+        <if test="orderComplaint.complaintReason != null and orderComplaint.complaintReason != '' ">and
+            A.complaint_reason = #{orderComplaint.complaintReason}
+        </if>
+        <if test="orderComplaint.complaintBusiStatus != null and orderComplaint.complaintBusiStatus != '' ">and
+            A.complaint_busi_status = #{orderComplaint.complaintBusiStatus}
+        </if>
+        <if test="orderComplaint.customerPhone != null and orderComplaint.customerPhone != '' ">and
+            A.customer_phone = #{orderComplaint.customerPhone}
+        </if>
+        <if test="orderComplaint.mchId != null and orderComplaint.mchId != '' ">and
+            A.mch_id = #{orderComplaint.mchId}
+        </if>
+        <if test="orderComplaint.customerId != null and orderComplaint.customerId != 0 ">and A.customer_id =
+            #{orderComplaint.customerId}
+        </if>
+        <if test="orderComplaint.tpName != null and orderComplaint.tpName != '' ">and E.tp_name like concat('%',
+            #{orderComplaint.tpName}, '%')
+        </if>
+        <if test="orderComplaint.applyStartTime != null  ">and A.`apply_time` <![CDATA[ >= ]]>
+            #{orderComplaint.applyStartTime}
+        </if>
+        <if test="orderComplaint.applyEndTime != null  ">and A.`apply_time` <![CDATA[ < ]]>
+            #{orderComplaint.applyEndTime}
+        </if>
+        order by A.gmt_modified DESC
+
+
+    </select>
+
+    <select id="queryGroupOrderComplaintBusiStatus"
+            resultType="com.weikbest.pro.saas.merchat.complaint.module.vo.ComplaintBusiStatusGroupVO">
+        select A.complaint_busi_status, count(1) total
+        from t_mmdm_order_complaint A
+        left join t_mmdm_order_info B on A.order_id = B.id
+        where A.flag = '0'
+        and B.data_status = '1'
+        and B.flag = '0'
+        <if test="param.businessId != null ">and B.business_id = #{param.businessId}</if>
+        <if test="param.shopId != null ">and B.shop_id = #{param.shopId}</if>
+        group by A.complaint_busi_status
+
+    </select>
+</mapper>

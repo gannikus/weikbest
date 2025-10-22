@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.busi.mapper.BusiUserMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.busi.module.vo.BusiUserPageVO">
+        select A.*, B.business_id, B.is_main_user
+        from t_mmdm_busi_user A
+        left join t_mmdm_busi_user_relate B on A.id = B.business_user_id
+        where 1=1
+        <if test="busiUser.businessId != null and busiUser.businessId != 0 ">and B.business_id = #{busiUser.businessId}</if>
+        <if test="busiUser.isMainUser != null and busiUser.isMainUser != '' ">and B.is_main_user = #{busiUser.isMainUser}</if>
+        <if test="busiUser.name != null and busiUser.name != '' ">and A.name = #{busiUser.name}</if>
+        <if test="busiUser.phone != null and busiUser.phone != '' ">and A.phone = #{busiUser.phone}</if>
+        <if test="busiUser.dataStatus != null and busiUser.dataStatus != '' ">and A.data_status = #{busiUser.dataStatus}</if>
+    </select>
+</mapper>

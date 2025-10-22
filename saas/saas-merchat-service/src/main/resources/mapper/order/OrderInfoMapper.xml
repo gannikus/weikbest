@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.order.mapper.OrderInfoMapper">
+
+    <select id="queryPageAppOrderInfo" resultType="com.weikbest.pro.saas.merchat.order.module.dto.AppOrderInfoListDTO">
+        select mo.id,mo.shop_id,mo.name,mo.prod_combo_id,mo.order_amount,mo.pay_amount,mo.delivery_pay_amount,mo.pay_type,
+        mo.number,mo.customer_id,mop.prod_id,mop.prod_name,mop.buy_number,
+        mo.pay_carriage,mo.discount_amount,mo.order_status,mop.prod_img,
+        mop.prod_combo_price,mop.prod_combo_attr_values,ms.name as shopname,ms.logo,st.wx_business
+        from t_mmdm_order_info mo
+        JOIN t_ccmm_customer cc ON cc.id = mo.customer_id
+        left join t_mmdm_order_prod_info mop on mo.id = mop.id
+        left join t_mmdm_shop ms on mo.shop_id = ms.id
+        left join t_mmdm_shop_third st on ms.id = st.id
+        where mo.data_status = '1' and mo.flag = '0' and ms.flag = '0'
+        <if test="customerId != null and customerId != '' "> AND cc.phone = (SELECT phone FROM t_ccmm_customer WHERE id = #{customerId} ) </if>
+        <if test="orderStatus != null and orderStatus != '' ">AND mo.order_status= #{orderStatus, jdbcType=VARCHAR}</if>
+        order by mo.order_time desc
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.order.module.vo.OrderInfoListVO">
+        select A.*, B.after_sale_status,
+        C.prod_name, C.buy_number, C.prod_combo_title, C.prod_combo_attr_values, C.prod_combo_price, C.prod_img, C.tips,
+        D.consignee, D.phone consignee_phone, D.addr_province, D.addr_city, D.addr_district, D.addr,
+        E.customer_description, E.tp_name,
+        F.logistics_company, F.courier_number, F.logistics_time,
+        G.pay_status, G.trading_flow, G.out_trade_no,
+        H.name shop_name
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        left join t_mmdm_shop H on A.shop_id = H.id
+        where A.flag = '0'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderStatus != null and orderInfo.orderStatus != '' ">and A.order_status =
+            #{orderInfo.orderStatus}
+        </if>
+        <if test="orderInfo.orderDeliverTimeout != null and orderInfo.orderDeliverTimeout != '' ">and
+            A.order_deliver_timeout = #{orderInfo.orderDeliverTimeout}
+        </if>
+        <if test="orderInfo.orderAfterFlag != null and orderInfo.orderAfterFlag != '' ">and A.order_after_flag =
+            #{orderInfo.orderAfterFlag}
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.adAid != null and orderInfo.adAid != 0 ">and A.ad_aid =
+            #{orderInfo.adAid}
+        </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+        <if test="orderInfo.shopName != null and orderInfo.shopName != '' ">and H.name like concat('%', #{orderInfo.shopName},
+            '%')
+        </if>
+        <if test="orderInfo.comboCode != null and orderInfo.comboCode != '' ">and C.combo_code like concat('%',
+            #{orderInfo.comboCode}, '%')
+        </if>
+        order by A.order_time
+        <if test="orderInfo.orderByOrderTime != null and orderInfo.orderByOrderTime != ''  ">
+            ${orderInfo.orderByOrderTime}
+        </if>
+    </select>
+
+    <select id="queryGroupOrderStatus" resultType="com.weikbest.pro.saas.merchat.order.module.vo.OrderStatusGroupVO">
+        select A.order_status order_group_status, count(1) total
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        where A.flag = '0'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderStatus != null and orderInfo.orderStatus != '' ">and A.order_status =
+            #{orderInfo.orderStatus}
+        </if>
+        <if test="orderInfo.orderDeliverTimeout != null and orderInfo.orderDeliverTimeout != '' ">and
+            A.order_deliver_timeout = #{orderInfo.orderDeliverTimeout}
+        </if>
+        <if test="orderInfo.orderAfterFlag != null and orderInfo.orderAfterFlag != '' ">and A.order_after_flag =
+            #{orderInfo.orderAfterFlag}
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.adAid != null and orderInfo.adAid != 0 ">and A.ad_aid = #{orderInfo.adAid} </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+        <if test="orderInfo.comboCode != null and orderInfo.comboCode != '' ">and C.combo_code like concat('%',
+            #{orderInfo.comboCode}, '%')
+        </if>
+        group by A.order_status
+    </select>
+
+    <select id="queryCountWaitDeliverCount" resultType="java.lang.Long">
+        select count(1)
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        where A.data_status = '1' and A.flag = '0' and A.order_status='10' and A.order_deliver_timeout = '0'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderAfterFlag != null and orderInfo.orderAfterFlag != '' ">and A.order_after_flag =
+            #{orderInfo.orderAfterFlag}
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.adAid != null and orderInfo.adAid != 0 ">and A.ad_aid = #{orderInfo.adAid} </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+    </select>
+
+
+    <select id="queryCountTimeoutDeliverCount" resultType="java.lang.Long">
+        select count(1)
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        where A.data_status = '1' and A.flag = '0' and A.order_status='10' and A.order_deliver_timeout = '1'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderAfterFlag != null and orderInfo.orderAfterFlag != '' ">and A.order_after_flag =
+            #{orderInfo.orderAfterFlag}
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.adAid != null and orderInfo.adAid != 0 ">and A.ad_aid = #{orderInfo.adAid} </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+    </select>
+
+
+    <select id="queryCountOrderAfterSaleCount" resultType="java.lang.Long">
+        select count(1)
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        where A.data_status = '1' and A.flag = '0' and A.order_after_flag = '1'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.adAid != null and orderInfo.adAid != 0 ">and A.ad_aid = #{orderInfo.adAid} </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+    </select>
+
+    <select id="downloadDetail"
+            resultType="com.weikbest.pro.saas.merchat.order.module.excel.OrderInfoDetailExcel">
+        select A.business_id, A.number order_number, A.order_source, A.adv_channel_type, A.adv_account_id, A.ad_aid, A.order_status, A.order_time,
+        A.pay_time, A.order_finish_time, A.order_amount, A.pay_carriage, A.discount_amount,A.pay_type, A.prod_id, A.description,
+        IF(A.pay_type = 1, A.pay_amount ,A.delivery_pay_amount) payAmount ,
+        B.after_sale_status, B.apply_type after_sale_apply_type,
+        C.prod_name, C.prod_combo_attr_values, C.prod_combo_id, C.prod_combo_title, C.buy_number,
+        D.consignee, D.phone consignee_phone, CONCAT_WS(' ',D.addr_province,D.addr_city,D.addr_district,D.addr) consignee_addr,
+        E.customer_description, E.tp_name,
+        F.logistics_time, F.logistics_company, F.courier_number,
+        H.number shop_number, H.name shop_name,
+        G.pay_mode, G.trading_flow
+        from t_mmdm_order_info A
+        left join t_mmdm_order_after_sale B on A.id = B.order_id and A.order_after_sale_id = B.id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        left join t_mmdm_order_rec_addr D on A.id = D.id
+        left join t_mmdm_order_cust_info E on A.id = E.id
+        left join t_mmdm_order_logistics F on A.id = F.order_id
+        left join t_mmdm_order_pay_record G on A.id = G.order_id
+        left join t_mmdm_shop H on A.shop_id = H.id
+        where A.flag = '0'
+        <if test="orderInfo.businessId != null and orderInfo.businessId != 0 ">and A.business_id =
+            #{orderInfo.businessId}
+        </if>
+        <if test="orderInfo.shopId != null and orderInfo.shopId != 0 ">and A.shop_id = #{orderInfo.shopId}</if>
+        <if test="orderInfo.number != null and orderInfo.number != '' ">and A.number = #{orderInfo.number}</if>
+        <if test="orderInfo.name != null and orderInfo.name != '' ">and A.name like concat('%', #{orderInfo.name},
+            '%')
+        </if>
+        <if test="orderInfo.orderStatus != null and orderInfo.orderStatus != '' ">and A.order_status =
+            #{orderInfo.orderStatus}
+        </if>
+        <if test="orderInfo.orderDeliverTimeout != null and orderInfo.orderDeliverTimeout != '' ">and
+            A.order_deliver_timeout = #{orderInfo.orderDeliverTimeout}
+        </if>
+        <if test="orderInfo.orderAfterFlag != null and orderInfo.orderAfterFlag != '' ">and A.order_after_flag =
+            #{orderInfo.orderAfterFlag}
+        </if>
+        <if test="orderInfo.orderSource != null and orderInfo.orderSource != '' ">and A.order_source =
+            #{orderInfo.orderSource}
+        </if>
+        <if test="orderInfo.payType != null and orderInfo.payType != '' ">and A.pay_type = #{orderInfo.payType}</if>
+        <if test="orderInfo.isAdvBack != null and orderInfo.isAdvBack != '' ">and A.is_adv_back = #{orderInfo.isAdvBack}</if>
+        <if test="orderInfo.advAccountId != null and orderInfo.advAccountId != 0 ">and A.adv_account_id =
+            #{orderInfo.advAccountId}
+        </if>
+        <if test="orderInfo.advChannelType != null and orderInfo.advChannelType != '' ">and A.adv_channel_type =
+            #{orderInfo.advChannelType}
+        </if>
+        <if test="orderInfo.appId != null and orderInfo.appId != '' ">and A.app_id = #{orderInfo.appId}</if>
+        <if test="orderInfo.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{orderInfo.orderStartTime}
+        </if>
+        <if test="orderInfo.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{orderInfo.orderEndTime}</if>
+        <if test="orderInfo.prodId != null and orderInfo.prodId != 0 ">and A.prod_id = #{orderInfo.prodId}</if>
+        <if test="orderInfo.prodComboId != null and orderInfo.prodComboId != 0 ">and A.prod_combo_id =
+            #{orderInfo.prodComboId}
+        </if>
+        <if test="orderInfo.customerId != null and orderInfo.customerId != 0 ">and A.customer_id =
+            #{orderInfo.customerId}
+        </if>
+        <if test="orderInfo.afterSaleStatus != null and orderInfo.afterSaleStatus != '' ">and B.after_sale_status =
+            #{orderInfo.afterSaleStatus}
+        </if>
+        <if test="orderInfo.prodName != null and orderInfo.prodName != '' ">and C.prod_name like concat('%',
+            #{orderInfo.prodName}, '%')
+        </if>
+        <if test="orderInfo.consignee != null and orderInfo.consignee != '' ">and D.consignee like concat('%',
+            #{orderInfo.consignee}, '%')
+        </if>
+        <if test="orderInfo.consigneePhone != null and orderInfo.consigneePhone != '' ">and D.phone =
+            #{orderInfo.consigneePhone}
+        </if>
+        <if test="orderInfo.customerName != null and orderInfo.customerName != '' ">and E.customer_name like concat('%',
+            #{orderInfo.customerName}, '%')
+        </if>
+        <if test="orderInfo.customerPhone != null and orderInfo.customerPhone != '' ">and E.customer_phone =
+            #{orderInfo.customerPhone}
+        </if>
+        <if test="orderInfo.courierNumber != null and orderInfo.courierNumber != '' ">and F.courier_number =
+            #{orderInfo.courierNumber}
+        </if>
+        <if test="orderInfo.logisticsStartTime != null  ">AND F.`logistics_time` <![CDATA[ >= ]]>
+            #{orderInfo.logisticsStartTime}
+        </if>
+        <if test="orderInfo.logisticsEndTime != null  ">AND F.`logistics_time` <![CDATA[ < ]]>
+            #{orderInfo.logisticsEndTime}
+        </if>
+        <if test="orderInfo.tradingFlow != null and orderInfo.tradingFlow != '' ">and G.trading_flow =
+            #{orderInfo.tradingFlow}
+        </if>
+        <if test="orderInfo.outTradeNo != null and orderInfo.outTradeNo != '' ">and G.out_trade_no =
+            #{orderInfo.outTradeNo}
+        </if>
+        order by A.order_time
+        <if test="orderInfo.orderByOrderTime != null and orderInfo.orderByOrderTime != ''  ">
+            ${orderInfo.orderByOrderTime}
+        </if>
+    </select>
+
+
+    <select id="queryDataCenter"
+            resultType="com.weikbest.pro.saas.merchat.order.module.dto.OrderInfoDataCenterDTO">
+        select A.id, A.business_id, A.shop_id, A.app_id, A.prod_id, A.order_time, A.order_source,
+               B.pay_amount, B.pay_status, B.customer_id, B.refund_status, B.refund_amount,
+               C.buy_number
+        from t_mmdm_order_info A
+        left join t_mmdm_order_pay_record B on A.id = B.order_id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        where A.data_status = '1' and A.pay_type = '1' and A.flag = '0'
+          and A.business_id = #{businessId}
+          and A.shop_id = #{shopId}
+        <if test="dataCenter.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{dataCenter.orderStartTime} </if>
+        <if test="dataCenter.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{dataCenter.orderEndTime}</if>
+        <if test="dataCenter.appId != null and dataCenter.appId != '' ">and A.app_id = #{dataCenter.appId}</if>
+    </select>
+
+    <select id="queryRefundDataCenter"
+            resultType="com.weikbest.pro.saas.merchat.order.module.dto.OrderInfoDataCenterDTO">
+        select A.id, A.business_id, A.shop_id, A.app_id, A.prod_id, A.order_time, A.order_source,
+        B.pay_amount, B.pay_status, B.customer_id, B.refund_status, B.refund_amount,
+        C.buy_number
+        from t_mmdm_order_info A
+        left join t_mmdm_order_pay_record B on A.id = B.order_id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        where A.data_status = '1' and A.pay_type = '1' and A.flag = '0'
+        and A.business_id = #{businessId}
+        and A.shop_id = #{shopId}
+        and B.refund_status = '1'
+        <if test="dataCenter.orderStartTime != null  ">AND B.`refund_time` <![CDATA[ >= ]]>#{dataCenter.orderStartTime} </if>
+        <if test="dataCenter.orderEndTime != null  ">AND B.`refund_time` <![CDATA[ < ]]> #{dataCenter.orderEndTime}</if>
+        <if test="dataCenter.appId != null and dataCenter.appId != '' ">and A.app_id = #{dataCenter.appId}</if>
+    </select>
+
+
+    <select id="buildCODVO" resultType="java.util.Map">
+        SELECT
+        SUM(t.delivery_pay_amount) totalMoney
+        , COUNT(t.id) sumTotal
+        , SUM(p.buy_number) deliveryOrderTotalNumberOfPackages
+        , COUNT(CASE WHEN t.is_adv_back = 1 THEN 1 END) backSumTotal
+        , SUM(CASE WHEN t.is_adv_back = 1 THEN t.delivery_pay_amount END) backTotalMoney
+        , SUM(CASE WHEN t.is_adv_back = 1 THEN p.buy_number END) deliveryOrderAdTotalNumberOfPackages
+        FROM
+        t_mmdm_order_info t
+        LEFT JOIN t_mmdm_order_prod_info p ON p.id = t.id
+        WHERE
+        t.shop_id = #{shopId}
+        AND t.flag = 0
+        AND t.pay_type = 2
+        AND t.order_time <![CDATA[ >= ]]> #{dataCenterQO.orderStartTime}
+        AND t.order_time <![CDATA[ <= ]]> #{dataCenterQO.orderEndTime}
+    </select>
+
+
+    <select id="getMainNumberByNumber" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT main_number FROM t_mmdm_order_info where number = #{number}
+    </select>
+
+</mapper>

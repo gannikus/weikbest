@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopRoleMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopRoleVO">
+        select A.*, B.number, B.name, B.is_preset, B.role_type, B.data_status, B.description
+        from t_mmdm_shop_role A
+        left join t_sys_role B on A.id = B.id
+        where B.role_type = '1' and B.data_status = '1'
+        <if test="shopRole.businessId != null and shopRole.businessId != 0 ">AND
+            A.`business_id`=#{shopRole.businessId}
+        </if>
+        <if test="shopRole.shopId != null and shopRole.shopId != 0 ">AND A.`shop_id`=#{shopRole.shopId}</if>
+        <if test="shopRole.name != null and shopRole.name != '' ">AND B.`name` like concat('%', #{shopRole.name},
+            '%')
+        </if>
+    </select>
+
+
+    <select id="queryAllRole" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopRoleVO">
+        select A.*, B.number, B.name, B.is_preset, B.role_type, B.data_status, B.description
+        from t_mmdm_shop_role A
+                 left join t_sys_role B on A.id = B.id
+        where B.role_type = '1'
+          and B.data_status = '1'
+          and A.`business_id` = #{businessId}
+          and A.`shop_id` = #{shopId}
+    </select>
+</mapper>

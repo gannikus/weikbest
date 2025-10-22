@@ -1,0 +1,78 @@
+package ${package.Parent}.${packageVO};
+
+#foreach($pkg in ${table.importPackages})
+import ${pkg};
+#end
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+#if(${springdoc})
+import io.swagger.v3.oas.annotations.media.Schema;
+#elseif(${swagger})
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+#end
+#if(${entityLombokModel})
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+    #if(${chainModel})
+    import lombok.experimental.Accessors;
+    #end
+#end
+
+/**
+ * <p>
+ * $!{table.comment}
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+    #if(${entityLombokModel})
+    @Getter
+    @Setter
+    @ToString
+        #if(${chainModel})
+        @Accessors(chain = true)
+        #end
+    #end
+    #if(${springdoc})
+    @Schema(name = "${entity}", description = "$!{table.comment}")
+    #elseif(${swagger})
+    @ApiModel(value = "${entity}VO对象", description = "$!{table.comment}")
+    #end
+public class ${entity}VO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    ## ----------  BEGIN 字段循环遍历  ----------
+    #foreach($field in ${table.fields})
+
+        #if(${field.keyFlag}) ## 主键
+        #elseif(${field.fill}) ## 填充字段
+        #else
+            #if(${field.versionField}) ## 乐观锁注解
+            #elseif(${field.logicDeleteField}) ## 逻辑删除注解
+            #else
+                #if("$!field.propertyName" == "creator")
+                #elseif("$!field.propertyName" == "modifier")
+                #else
+                    #if("$!field.propertyType" == "Long")
+                    @JsonSerialize(using = ToStringSerializer.class)
+                    #end
+                    #if("$!field.comment" != "")
+                        #if(${springdoc})
+                        @Schema(description = "${field.comment}")
+                        #elseif(${swagger})
+                        @ApiModelProperty("${field.comment}")
+                        #else
+                        /**
+                         * ${field.comment}
+                         */
+                        #end
+                    #end
+                private ${field.propertyType} ${field.propertyName};
+                #end
+            #end
+        #end
+    #end
+}

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.coupon.mapper.CustCouponRestrictMapper">
+
+    <select id="queryCountUseableCustCouponRestricts" resultType="java.lang.Integer">
+        select count(*)
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId} and ccr.restrict_type in ('1','5') and cp.coupon_type in('1', '2', '3')
+    </select>
+
+    <select id="queryUseableCustCouponRestricts" resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+             ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+             ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname,cp.merchat_logo_ossurl
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId} and ccr.restrict_type in ('1','5') and cp.coupon_type in('1', '2', '3')
+        order by ccr.restrict_date asc
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryCountExpiredCustCouponRestricts" resultType="java.lang.Integer">
+        select count(*)
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId} and ccr.restrict_type = '10' and cp.coupon_type in('1', '2', '3')
+    </select>
+
+    <select id="queryExpiredCustCouponRestricts" resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+             ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+             ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname,cp.merchat_logo_ossurl
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId} and ccr.restrict_type = '10' and cp.coupon_type in('1', '2', '3')
+        order by ccr.restrict_date asc
+            LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryCountUsedCustCouponRestricts" resultType="java.lang.Integer">
+        select count(*)
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}  and ccr.restrict_type in ('15','20','25') and cp.coupon_type in('1', '2', '3')
+    </select>
+
+    <select id="queryUsedCustCouponRestricts" resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+             ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+             ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname,cp.merchat_logo_ossurl
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}  and ccr.restrict_type in ('15','20','25') and cp.coupon_type in('1', '2', '3')
+        order by ccr.restrict_date asc
+            LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryCountUseableCustCouponProds" resultType="java.lang.Integer">
+        select count(DISTINCT ccr.id)
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_prod_coupon_relate pcr on cp.id = pcr.coupon_id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}
+          and pcr.id = #{prodId}
+          and ccr.restrict_type in ('5')
+          and cp.coupon_type in('1', '2', '3')
+          and (cp.coupon_use_type = '0' or (cp.coupon_use_type = '1' and cp.coupon_use_price <![CDATA[ <= ]]> #{price} ))
+    </select>
+
+    <select id="queryUseableCustCouponProds" resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,ccr.coupon_id,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+             ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+             ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}
+        and ccr.prod_id =#{prodId}
+          and ccr.restrict_type in ('5')
+          <if test="couponType!=null and couponType!='' and couponType =='1'">
+              and cp.coupon_type = '1'
+          </if>
+        <if test="couponType!=null and couponType!='' and couponType =='2'">
+            and cp.coupon_type in('1', '2', '3')
+        </if>
+            and cp.use_start_time <![CDATA[ < ]]> now()
+            and cp.use_end_time <![CDATA[ > ]]> now()
+          and (cp.coupon_use_type = '0' or (cp.coupon_use_type = '1' and cp.coupon_use_price <![CDATA[ <= ]]> #{price} ))
+        order by ccr.gmt_create desc
+            LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryCountUnuseableCustCouponProds" resultType="java.lang.Integer">
+        select count(DISTINCT ccr.id)
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_prod_coupon_relate pcr on cp.id = pcr.coupon_id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}
+          and pcr.id = #{prodId}
+          and cp.coupon_type in('1', '2', '3')
+          and (ccr.restrict_type in ('1','15') or
+               (ccr.restrict_type = '5' and cp.coupon_use_type = '1' and cp.coupon_use_price <![CDATA[ > ]]> #{price} ))
+    </select>
+
+    <select id="queryUnuseableCustCouponProds" resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+             ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+             ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname
+        from t_ccmm_cust_coupon_restrict ccr
+                 LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+                 LEFT JOIN t_mmdm_prod_coupon_relate pcr on cp.id = pcr.coupon_id
+                 LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}
+          and pcr.id = #{prodId}
+          and cp.coupon_type in('1', '2', '3')
+          and (ccr.restrict_type in ('1','15') or
+               (ccr.restrict_type = '5' and cp.coupon_use_type = '1' and cp.coupon_use_price <![CDATA[ > ]]> #{price} ))
+        order by ccr.gmt_create desc , cp.event_end_time ASC
+            LIMIT ${start},${limit};
+    </select>
+    <select id="listUseableCustCouponProds"
+            resultType="com.weikbest.pro.saas.merchat.coupon.module.dto.AppCustCouponRestrictDTO">
+        select ccr.id as custcouponrestrictId,ccr.coupon_id,cp.id,cp.`name`,cp.merchat_logo_url,cp.use_end_time,cp.app_id
+        ,cp.event_end_time,cp.discount_amount,cp.coupon_type,cp.coupon_use_url
+        ,cp.coupon_use_type,cp.coupon_use_price,sp.`name` as shopname
+        from t_ccmm_cust_coupon_restrict ccr
+        LEFT JOIN t_mmdm_coupon cp on ccr.coupon_id = cp.id
+        LEFT JOIN t_mmdm_shop sp on cp.shop_id = sp.id
+        where ccr.customer_id = #{customerId}
+        and ccr.prod_id =#{prodId}
+        and ccr.restrict_type in ('5')
+        <if test="couponType!=null and couponType!='' and couponType =='1'">
+            and cp.coupon_type = '1'
+        </if>
+        <if test="couponType!=null and couponType!='' and couponType =='2'">
+            and cp.coupon_type in('1', '2', '3')
+        </if>
+        and cp.use_start_time <![CDATA[ < ]]> now()
+        and cp.use_end_time <![CDATA[ > ]]> now()
+        and (cp.coupon_use_type = '0' or (cp.coupon_use_type = '1' and cp.coupon_use_price <![CDATA[ <= ]]> #{price} ))
+        order by ccr.gmt_create desc
+    </select>
+
+</mapper>

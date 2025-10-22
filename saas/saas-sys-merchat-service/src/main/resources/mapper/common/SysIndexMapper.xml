@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sysmerchat.common.mapper.SysIndexMapper">
+
+
+    <select id="queryRealtime"
+            resultType="com.weikbest.pro.saas.sysmerchat.common.module.dto.RealtimeDTO">
+        select A.id, A.business_id, A.shop_id, A.app_id, A.prod_id, A.order_time, A.order_source,
+        B.pay_amount, B.pay_status, B.pay_time, B.customer_id, B.refund_status, B.refund_amount,
+        C.buy_number
+        from t_mmdm_order_info A
+        left join t_mmdm_order_pay_record B on A.id = B.order_id
+        left join t_mmdm_order_prod_info C on A.id = C.id
+        where A.data_status = '1' and A.flag = '0'
+        <if test="realtime.businessId != null and realtime.businessId != 0 ">and A.business_id = #{realtime.businessId}</if>
+        <if test="realtime.orderStartTime != null  ">AND A.`order_time` <![CDATA[ >= ]]>#{realtime.orderStartTime} </if>
+        <if test="realtime.orderEndTime != null  ">AND A.`order_time` <![CDATA[ < ]]> #{realtime.orderEndTime}</if>
+        <if test="realtime.appId != null and realtime.appId != '' ">and A.app_id = #{realtime.appId}</if>
+    </select>
+
+</mapper>

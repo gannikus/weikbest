@@ -1,0 +1,42 @@
+package com.weikbest.pro.saas.sysmerchat.common.module.qo;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * @author 西瓜瓜
+ * @project saas
+ * @jdk 1.8
+ * @since :2023/2/18
+ */
+@Getter
+@Setter
+@ToString
+@Accessors(chain = true)
+@ApiModel(value = "RealtimeQO对象", description = "平台首页实时概况查询实体")
+public class RealtimeQO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @ApiModelProperty("商户ID")
+    private Long businessId;
+
+    @ApiModelProperty("查询开始时间")
+    private Date orderStartTime;
+
+    @ApiModelProperty("查询结束时间")
+    private Date orderEndTime;
+
+    @ApiModelProperty("查询小程序ID，对应数据字典的 key")
+    private String appId;
+}

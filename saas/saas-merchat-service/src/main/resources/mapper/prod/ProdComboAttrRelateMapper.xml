@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.prod.mapper.ProdComboAttrRelateMapper">
+
+    <select id="getIdByProdId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select id from t_mmdm_prod_combo_attr_relate where prod_id = #{prodId}
+    </select>
+
+</mapper>

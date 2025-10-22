@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sysmerchat.business.mapper.SysBusiMapper">
+
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.sysmerchat.business.module.vo.SysBusiListVO">
+        select A.*, B.business_type
+        from t_mmdm_busi_user A
+        left join t_mmdm_busi_user_relate C on A.id = C.business_user_id
+        left join t_mmdm_business B on C.business_id = B.id
+        where C.is_main_user = '1' AND A.flag = '0' AND B.flag = '0'
+        <if test="sysBusi.id != null and sysBusi.id != 0 ">AND A.`id`=#{sysBusi.id}</if>
+        <if test="sysBusi.businessId != null and sysBusi.businessId != 0 ">AND C.`business_id`=#{sysBusi.businessId}
+        </if>
+        <if test="sysBusi.name != null and sysBusi.name != '' ">AND A.`name` like concat('%', #{sysBusi.name}, '%')</if>
+        <if test="sysBusi.phone != null and sysBusi.phone != '' ">AND A.`prod_status`=#{sysBusi.phone}</if>
+        <if test="sysBusi.businessType != null and sysBusi.businessType != '' ">AND
+            B.`business_type`=#{sysBusi.businessType}
+        </if>
+        <if test="sysBusi.dataStatus != null and sysBusi.dataStatus != '' ">AND B.`data_status`=#{sysBusi.dataStatus}
+        </if>
+        <if test="sysBusi.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{sysBusi.startDate}</if>
+        <if test="sysBusi.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{sysBusi.endDate}</if>
+    </select>
+</mapper>

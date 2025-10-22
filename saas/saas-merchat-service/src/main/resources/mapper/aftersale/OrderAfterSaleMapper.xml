@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.aftersale.mapper.OrderAfterSaleMapper">
+
+    <select id="queryPageAppOrderAfterApply"
+            resultType="com.weikbest.pro.saas.merchat.aftersale.module.dto.AppOrderAfterSaleApplyDTO">
+        select mo.id,mo.shop_id,mo.name,mo.prod_combo_id,mo.order_amount,mo.pay_amount,
+        mo.number,mo.customer_id,mop.prod_id,mop.prod_name,mop.buy_number,
+        mo.pay_carriage,mo.discount_amount,mo.order_status,mop.prod_img,ms.logo,
+        mop.prod_combo_price,mop.prod_combo_attr_values,ms.name as shopname,mo.order_after_sale_id,st.wx_business
+        from t_mmdm_order_info mo
+        left join t_mmdm_order_prod_info mop on mo.id = mop.id
+        left join t_mmdm_shop ms on mo.shop_id = ms.id
+        left join t_mmdm_shop_third st on ms.id = st.id
+        where mo.data_status = '1' and mo.flag = '0' and mo.order_status in('10','20','30')
+        and ms.flag = '0'
+        <if test="customerId != null and customerId != '' ">and mo.customer_id = #{customerId}</if>
+        order by mo.order_time desc
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryPageAppOrderAfterList"
+            resultType="com.weikbest.pro.saas.merchat.aftersale.module.dto.AppOrderAfterSaleListDTO">
+        select mo.shop_id,mo.name,mo.prod_combo_id,mo.order_amount,mo.pay_amount,mo.number,
+        ms.logo,ms.name as shopname,os.apply_amount,os.apply_type,os.after_sale_status,mop.buy_number,st.wx_business,
+        mop.prod_img,mop.prod_sku_price,mop.prod_combo_attr_values,mo.order_after_sale_id,
+        case os.after_sale_status
+        when '0' then '0'
+        when '1' then '0'
+        when '3' then '0'
+        when '4' then '0'
+        when '9' then '0'
+        else '1' end inprocess
+        from t_mmdm_order_after_sale os
+        left join t_mmdm_order_info mo on os.order_id = mo.id
+        left join t_mmdm_order_prod_info mop on mo.id = mop.id
+        left join t_mmdm_shop ms on mo.shop_id = ms.id
+        left join t_mmdm_shop_third st on ms.id = st.id
+        where os.flag = '0'
+        and mo.data_status = '1' and mo.flag = '0'
+        <if test="customerId != null and customerId != '' ">and mo.customer_id = #{customerId}</if>
+        <if test="afterSaleStatus != null and afterSaleStatus != '' ">AND mo.after_sale_status=
+            #{afterSaleStatus, jdbcType=VARCHAR}
+        </if>
+        <if test="inprocess != null and inprocess != '' ">and os.after_sale_status not in('0','1','3','4','9')</if>
+        order by os.apply_time desc
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryGroupOrderAfterSaleKey"
+            resultType="com.weikbest.pro.saas.merchat.aftersale.module.vo.OrderAfterSaleKeyGroupVO">
+        select A.after_sale_key, count(1) total
+        from t_mmdm_order_after_sale A
+        left join t_mmdm_order_info B on A.order_id = B.id
+        where A.flag = '0'
+        and B.data_status = '1'
+        and B.flag = '0'
+        <if test="param.businessId != null ">and B.business_id = #{param.businessId}</if>
+        <if test="param.shopId != null ">and B.shop_id = #{param.shopId}</if>
+        group by A.after_sale_key
+    </select>
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.aftersale.module.vo.OrderAfterSaleListVO">
+        select A.*, B.number order_number, B.pay_amount, B.order_status, B.order_logistics_id orderSendType ,
+        C.prod_id, C.prod_sku_id, C.prod_combo_id, C.prod_name, C.buy_number, C.prod_combo_title,
+        C.prod_combo_attr_values, C.prod_combo_price, C.prod_img,
+        D.consignee, D.phone consignee_phone, D.addr_province, D.addr_city, D.addr_district, D.addr,
+        E.customer_description, E.tp_name,
+        F.pay_status, F.trading_flow, F.out_trade_no, F.refund_trade_no, F.refund_amount, F.refund_status, F.refund_time,F.pay_time
+        <if test="orderAfterSale.orderByOrderTime != null and orderAfterSale.orderByOrderTime != '' and orderAfterSale.orderByOrderTime=='desc' ">
+            ,G.time_out
+        </if>
+        from t_mmdm_order_after_sale A
+        left join t_mmdm_order_info B on A.order_id = B.id
+        left join t_mmdm_order_prod_info C on A.order_id = C.id
+        left join t_mmdm_order_rec_addr D on A.order_id = D.id
+        left join t_mmdm_order_cust_info E on A.order_id = E.id
+        left join t_mmdm_order_pay_record F on A.order_id = F.order_id
+        <if test="orderAfterSale.orderByOrderTime != null and orderAfterSale.orderByOrderTime != '' and orderAfterSale.orderByOrderTime=='desc' ">
+            LEFT JOIN (SELECT max(r.timeout_date) time_out, s.id
+            FROM t_sys_delay_task_record r,
+            t_mmdm_order_after_sale s
+            WHERE task_status = '0'
+            AND delay_task LIKE concat('%', s.id, '%') group by s.id) G ON G.id = A.id
+        </if>
+        where A.flag = '0'
+        and B.data_status = '1' and B.flag = '0'
+        <if test="orderAfterSale.id != null and orderAfterSale.id != 0 ">and A.id = #{orderAfterSale.id}</if>
+        <if test="orderAfterSale.number != null and orderAfterSale.number != '' ">and A.number =
+            #{orderAfterSale.number}
+        </if>
+        <if test="orderAfterSale.businessId != null and orderAfterSale.businessId != 0 ">and B.business_id =
+            #{orderAfterSale.businessId}
+        </if>
+        <if test="orderAfterSale.shopId != null and orderAfterSale.shopId != 0 ">and B.shop_id =
+            #{orderAfterSale.shopId}
+        </if>
+        <if test="orderAfterSale.orderNumber != null and orderAfterSale.orderNumber != '' ">and B.number =
+            #{orderAfterSale.orderNumber}
+        </if>
+        <if test="orderAfterSale.appId != null and orderAfterSale.appId != '' ">and B.app_id = #{orderAfterSale.appId}
+        </if>
+        <if test="orderAfterSale.applyStartTime != null  ">and A.`apply_time` <![CDATA[ >= ]]>
+            #{orderAfterSale.applyStartTime}
+        </if>
+        <if test="orderAfterSale.applyEndTime != null  ">and A.`apply_time` <![CDATA[ < ]]>
+            #{orderAfterSale.applyEndTime}
+        </if>
+        <if test="orderAfterSale.prodId != null and orderAfterSale.prodId != 0 ">and B.prod_id =
+            #{orderAfterSale.prodId}
+        </if>
+        <if test="orderAfterSale.prodComboId != null and orderAfterSale.prodComboId != 0 ">and B.prod_combo_id =
+            #{orderAfterSale.prodComboId}
+        </if>
+        <if test="orderAfterSale.customerId != null and orderAfterSale.customerId != 0 ">and A.customer_id =
+            #{orderAfterSale.customerId}
+        </if>
+        <if test="orderAfterSale.sendType != null and orderAfterSale.sendType != '' ">
+            <if test="orderAfterSale.sendType == 10" > and (B.order_logistics_id IS NULL OR B.order_logistics_id = 0) </if>
+            <if test="orderAfterSale.sendType == 20" > and B.order_logistics_id is not null and B.order_logistics_id != 0 </if>
+        </if>
+        <if test="orderAfterSale.isFastSale != null and orderAfterSale.isFastSale != '' ">and A.is_fast_sale =
+            #{orderAfterSale.isFastSale}
+        </if>
+        <if test="orderAfterSale.afterSaleStatus != null and orderAfterSale.afterSaleStatus != '' ">and
+            A.after_sale_status = #{orderAfterSale.afterSaleStatus}
+        </if>
+        <if test="orderAfterSale.afterSaleKey != null and orderAfterSale.afterSaleKey != '' ">and A.after_sale_key =
+            #{orderAfterSale.afterSaleKey}
+        </if>
+        <if test="orderAfterSale.applyType != null and orderAfterSale.applyType != '' ">and A.apply_type =
+            #{orderAfterSale.applyType}
+        </if>
+        <if test="orderAfterSale.backCourierNumber != null and orderAfterSale.backCourierNumber != '' ">and
+            A.back_courier_number = #{orderAfterSale.backCourierNumber}
+        </if>
+        <if test="orderAfterSale.prodName != null and orderAfterSale.prodName != '' ">and C.prod_name like concat('%',
+            #{orderAfterSale.prodName}, '%')
+        </if>
+        <if test="orderAfterSale.consignee != null and orderAfterSale.consignee != '' ">and D.consignee like concat('%',
+            #{orderAfterSale.consignee}, '%')
+        </if>
+        <if test="orderAfterSale.consigneePhone != null and orderAfterSale.consigneePhone != '' ">and D.phone =
+            #{orderAfterSale.consigneePhone}
+        </if>
+        <if test="orderAfterSale.orderByOrderTime != null and orderAfterSale.orderByOrderTime != ''  ">
+        <choose>
+            <when test="orderAfterSale.orderByOrderTime=='asc'">
+                order by A.apply_time DESC
+            </when>
+            <when test="orderAfterSale.orderByOrderTime=='desc'">
+                order by G.time_out ASC
+            </when>
+            <otherwise>
+                order by A.apply_time DESC
+            </otherwise>
+        </choose>
+        </if>
+    </select>
+
+
+    <select id="downloadDetail"
+            resultType="com.weikbest.pro.saas.merchat.aftersale.module.excel.OrderAfterSaleDetailExcel">
+        select A.number after_sale_number, A.apply_type after_sale_apply_type, A.apply_amount, A.goods_num, A.apply_time, A.after_sale_status,
+        A.apply_reason, A.back_address, A.back_logistics_company, A.back_courier_number,
+        B.number order_number, B.order_source, B.pay_time, B.order_amount, B.pay_amount, B.order_status, B.description,
+        C.prod_id, C.prod_name, C.prod_combo_attr_values,
+        E.customer_description,
+        G.number shopNumber, G.name shopName,
+        H.logistics_company, H.courier_number
+        from t_mmdm_order_after_sale A
+        left join t_mmdm_order_info B on A.order_id = B.id
+        left join t_mmdm_order_prod_info C on A.order_id = C.id
+        left join t_mmdm_order_rec_addr D on A.order_id = D.id
+        left join t_mmdm_order_cust_info E on A.order_id = E.id
+        left join t_mmdm_order_pay_record F on A.order_id = F.order_id
+        left join t_mmdm_shop G on B.shop_id = G.id
+        left join t_mmdm_order_logistics H on A.order_id = H.order_id
+        where A.flag = '0'
+        and B.flag = '0'
+        <if test="orderAfterSale.id != null and orderAfterSale.id != 0 ">and A.id = #{orderAfterSale.id}</if>
+        <if test="orderAfterSale.number != null and orderAfterSale.number != '' ">and A.number =
+            #{orderAfterSale.number}
+        </if>
+        <if test="orderAfterSale.businessId != null and orderAfterSale.businessId != 0 ">and B.business_id =
+            #{orderAfterSale.businessId}
+        </if>
+        <if test="orderAfterSale.shopId != null and orderAfterSale.shopId != 0 ">and B.shop_id =
+            #{orderAfterSale.shopId}
+        </if>
+        <if test="orderAfterSale.orderNumber != null and orderAfterSale.orderNumber != '' ">and B.number =
+            #{orderAfterSale.orderNumber}
+        </if>
+        <if test="orderAfterSale.appId != null and orderAfterSale.appId != '' ">and B.app_id = #{orderAfterSale.appId}
+        </if>
+        <if test="orderAfterSale.applyStartTime != null  ">and A.`apply_time` <![CDATA[ >= ]]>
+            #{orderAfterSale.applyStartTime}
+        </if>
+        <if test="orderAfterSale.applyEndTime != null  ">and A.`apply_time` <![CDATA[ < ]]>
+            #{orderAfterSale.applyEndTime}
+        </if>
+        <if test="orderAfterSale.prodId != null and orderAfterSale.prodId != 0 ">and B.prod_id =
+            #{orderAfterSale.prodId}
+        </if>
+        <if test="orderAfterSale.prodComboId != null and orderAfterSale.prodComboId != 0 ">and B.prod_combo_id =
+            #{orderAfterSale.prodComboId}
+        </if>
+        <if test="orderAfterSale.customerId != null and orderAfterSale.customerId != 0 ">and A.customer_id =
+            #{orderAfterSale.customerId}
+        </if>
+        <if test="orderAfterSale.sendType != null and orderAfterSale.sendType != '' ">and A.send_type =
+            #{orderAfterSale.sendType}
+        </if>
+        <if test="orderAfterSale.isFastSale != null and orderAfterSale.isFastSale != '' ">and A.is_fast_sale =
+            #{orderAfterSale.isFastSale}
+        </if>
+        <if test="orderAfterSale.afterSaleStatus != null and orderAfterSale.afterSaleStatus != '' ">and
+            A.after_sale_status = #{orderAfterSale.afterSaleStatus}
+        </if>
+        <if test="orderAfterSale.afterSaleKey != null and orderAfterSale.afterSaleKey != '' ">and A.after_sale_key =
+            #{orderAfterSale.afterSaleKey}
+        </if>
+        <if test="orderAfterSale.applyType != null and orderAfterSale.applyType != '' ">and A.apply_type =
+            #{orderAfterSale.applyType}
+        </if>
+        <if test="orderAfterSale.backCourierNumber != null and orderAfterSale.backCourierNumber != '' ">and
+            A.back_courier_number = #{orderAfterSale.backCourierNumber}
+        </if>
+        <if test="orderAfterSale.prodName != null and orderAfterSale.prodName != '' ">and C.prod_name like concat('%',
+            #{orderAfterSale.prodName}, '%')
+        </if>
+        <if test="orderAfterSale.consignee != null and orderAfterSale.consignee != '' ">and D.consignee like concat('%',
+            #{orderAfterSale.consignee}, '%')
+        </if>
+        <if test="orderAfterSale.consigneePhone != null and orderAfterSale.consigneePhone != '' ">and D.phone =
+            #{orderAfterSale.consigneePhone}
+        </if>
+        order by B.order_time
+        <if test="orderAfterSale.orderByOrderTime != null and orderAfterSale.orderByOrderTime != ''  ">
+            ${orderAfterSale.orderByOrderTime}
+        </if>
+    </select>
+
+</mapper>

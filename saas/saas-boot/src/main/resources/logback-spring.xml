@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <property name="LOG_DIR" value="/app/logs"/>
+    <property name="LEVEL" value="INFO"/>
+    <property name="ERRLEVEL" value="ERROR"/>
+    <property name="INFOLEVEL" value="INFO"/>
+    <property name="DEBUGLEVEL" value="DEBUG"/>
+    <property name="maxFileSize" value="100MB"/>
+    <property name="ENCODING" value="UTF-8"/>
+    <contextName>saas</contextName>
+
+    <!--配置规则类的位置-->
+    <conversionRule conversionWord="traceid"
+                    converterClass="com.weikbest.pro.saas.common.annotation.log.TraceidConverterConfig"/>
+
+    <property name="LOG_FILE_NAME" value="saas"/>
+    <property name="logFileNamePattern" value="${LOG_FILE_NAME}_%d{yyyy-MM-dd}_%i"/>
+    <property name="fileLayoutPattern"
+              value="%d{yyyyMMdd:HH:mm:ss.SSS}[${HOSTNAME}][traceid:%traceid] [%thread] [%line] - [%logger{25}:%method]%-5level %msg%n"/>
+    <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+    <!-- <property name="consoleLayoutPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}[${HOSTNAME}] [%thread] [%line] - %highlight(%-5level) %cyan(%logger{25}) - %highlight(%msg) %n"/> -->
+    <property name="consoleLayoutPattern"
+              value="%d{yyyyMMdd:HH:mm:ss.SSS}[${HOSTNAME}][traceid:%traceid] [%thread] [%line] - [%logger{25}:%method]%-5level %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${consoleLayoutPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 支持多JVM同时操作同一个日志文件 -->
+<!--        <prudent>true</prudent>-->
+        <File>${LOG_DIR}/${LOG_FILE_NAME}.log</File>
+        <!-- rollingPolicy:当发生滚动时，决定 RollingFileAppender 的行为，涉及文件移动和重命名。 -->
+        <!-- TimeBasedRollingPolicy： 最常用的滚动策略，它根据时间来制定滚动策略，既负责滚动也负责出发滚动 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${logFileNamePattern}.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${maxFileSize}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>${ENCODING}</charset>
+            <pattern>${fileLayoutPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name = "prod">
+        <logger name="com.weikbest.pro" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.springframework.core" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.PreparedStatement" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.ResultSet" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.Connection" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="mybatis.sql" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="druid.sql.Statement" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.apache.ibatis.logging.stdout.StdOutImpl" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="com.weikbest.pro.saas.config.MPStdOutImpl" level="${LEVEL}" additivity="false">
+            <appender-ref ref="ROLLING"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name = "dev">
+        <logger name="com.weikbest.pro" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.springframework.core" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.PreparedStatement" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.ResultSet" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.Connection" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="mybatis.sql" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="druid.sql.Statement" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.apache.ibatis.logging.stdout.StdOutImpl" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="com.weikbest.pro.saas.config.MPStdOutImpl" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="ROLLING"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name = "devlocal">
+        <logger name="com.weikbest.pro" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.springframework.core" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.PreparedStatement" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.ResultSet" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="java.sql.Connection" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="mybatis.sql" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="druid.sql.Statement" level="${LEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="org.apache.ibatis.logging.stdout.StdOutImpl" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING"/>
+        </logger>
+
+        <logger name="com.weikbest.pro.saas.config.MPStdOutImpl" level="${DEBUGLEVEL}" additivity="false">
+            <appender-ref ref="ROLLING"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+
+    <root level="${LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLING"/>
+    </root>
+
+</configuration>

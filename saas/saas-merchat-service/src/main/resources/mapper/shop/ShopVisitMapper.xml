@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopVisitMapper">
+
+    <select id="queryDataCenter" resultType="com.weikbest.pro.saas.merchat.shop.entity.ShopVisit">
+
+        select *
+        from t_mmdm_shop_visit A
+        where A.shop_id = #{shopId}
+        <if test="dataCenter.orderStartTime != null  ">AND A.`visit_time` <![CDATA[ >= ]]>#{dataCenter.orderStartTime} </if>
+        <if test="dataCenter.orderEndTime != null  ">AND A.`visit_time` <![CDATA[ < ]]> #{dataCenter.orderEndTime}</if>
+        <if test="dataCenter.appId != null and dataCenter.appId != '' ">and A.app_id = #{dataCenter.appId}</if>
+
+    </select>
+</mapper>

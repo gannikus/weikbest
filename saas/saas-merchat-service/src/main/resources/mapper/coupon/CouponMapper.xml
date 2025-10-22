@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.coupon.mapper.CouponMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.coupon.module.vo.CouponPageVO">
+        select A.*, B.name shop_name
+        from t_mmdm_coupon A
+        left join t_mmdm_shop B on A.shop_id = B.id
+        where A.coupon_type in ('1','2') AND A.flag = '0' AND B.flag = '0'
+        <if test="coupon.id != null and coupon.id != 0 ">AND A.`id`=#{coupon.id}</if>
+        <if test="coupon.shopId != null and coupon.shopId != 0 ">AND A.`shop_id`=#{coupon.shopId}</if>
+        <if test="coupon.name != null and coupon.name != '' ">AND A.`name` like concat('%', #{coupon.name}, '%')</if>
+        <if test="coupon.shopName != null and coupon.shopName != '' ">AND B.`name` like concat('%', #{coupon.shopName}, '%')</if>
+        <if test="coupon.couponStatus != null and coupon.couponStatus != '' ">AND A.`coupon_status`=#{coupon.couponStatus}</if>
+        <if test="coupon.couponType != null and coupon.couponType != '' ">AND A.`coupon_type`=#{coupon.couponType}</if>
+        <if test="coupon.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{coupon.startDate}</if>
+        <if test="coupon.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{coupon.endDate}</if>
+        order by A.`gmt_create` desc
+    </select>
+
+    <select id="queryCouponById" resultType="com.weikbest.pro.saas.merchat.coupon.entity.Coupon">
+        SELECT id,shop_id,name,tips,coupon_type,coupon_status,event_start_time,
+               event_end_time,coupon_num,coupon_prod_type,coupon_use_type,coupon_use_price,
+               app_id,discount_amount,get_start_time,get_end_time,restrict_count,
+               restrict_user_type,is_open,use_start_time,use_end_time,enable_type,
+               delay_enable_day,validity_day,coupon_use_url,coupon_theme_type,coupon_image_url,
+               coupon_image_ossurl,merchat_logo_url,merchat_logo_ossurl,out_request_no,bind_mch_id,
+               bind_wxgzh_app_id,stock_id,create_time,bind_partner_merchant_id,description,
+               data_status,flag,creator,modifier,gmt_create,gmt_modified
+        FROM t_mmdm_coupon WHERE id= #{couponId}
+    </select>
+
+    <select id="queryCouponByStockId" resultType="com.weikbest.pro.saas.merchat.coupon.entity.Coupon">
+        SELECT id,shop_id,name,tips,coupon_type,coupon_status,event_start_time,
+               event_end_time,coupon_num,coupon_prod_type,coupon_use_type,coupon_use_price,
+               app_id,discount_amount,get_start_time,get_end_time,restrict_count,
+               restrict_user_type,is_open,use_start_time,use_end_time,enable_type,
+               delay_enable_day,validity_day,coupon_use_url,coupon_theme_type,coupon_image_url,
+               coupon_image_ossurl,merchat_logo_url,merchat_logo_ossurl,out_request_no,bind_mch_id,
+               bind_wxgzh_app_id,stock_id,create_time,bind_partner_merchant_id,description,
+               data_status,flag,creator,modifier,gmt_create,gmt_modified
+        FROM t_mmdm_coupon WHERE stock_id= #{stockId}
+    </select>
+    
+</mapper>

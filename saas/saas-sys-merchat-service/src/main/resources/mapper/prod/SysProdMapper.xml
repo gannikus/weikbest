@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sysmerchat.prod.mapper.SysProdMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.sysmerchat.prod.module.vo.SysProdListVO">
+        select A.*, B.combo_min_price, C.show_img, D.name category_name, E.name shop_name
+        from t_mmdm_prod A
+        left join t_mmdm_prod_price B on A.id = B.id
+        left join t_mmdm_prod_theme C on A.id = C.id
+        left join t_mmdm_prod_category D on A.category_id = D.id
+        left join t_mmdm_shop E on A.shop_id = E.id
+        left join t_mmdm_business F on A.business_id = F.id
+        where A.flag = '0' and E.flag = '0'
+        <if test="sysProd.id != null and sysProd.id != 0 ">AND A.`id`=#{sysProd.id}</if>
+        <if test="sysProd.businessId != null and sysProd.businessId != 0 ">AND A.`business_id`=#{sysProd.businessId}
+        </if>
+        <if test="sysProd.shopId != null and sysProd.shopId != 0 ">AND A.`shop_id`=#{sysProd.shopId}</if>
+        <if test="sysProd.categoryId != null and sysProd.categoryId != 0 ">AND A.`category_id`=#{sysProd.categoryId}
+        </if>
+        <if test="sysProd.name != null and sysProd.name != '' ">AND A.`name` like concat('%', #{sysProd.name}, '%')</if>
+        <if test="sysProd.prodStatus != null and sysProd.prodStatus != '' ">AND A.`prod_status`=#{sysProd.prodStatus}
+        </if>
+        <if test="sysProd.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{sysProd.startDate}</if>
+        <if test="sysProd.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{sysProd.endDate}</if>
+        <if test="sysProd.minSales != null and sysProd.minSales != 0 ">AND A.`sales` <![CDATA[ >= ]]>
+            #{sysProd.minSales}
+        </if>
+        <if test="sysProd.maxSales != null and sysProd.maxSales != 0 ">AND A.`sales` <![CDATA[ < ]]>
+            #{sysProd.maxSales}
+        </if>
+        <if test="sysProd.minComboMinPrice != null and sysProd.minComboMinPrice != 0 ">AND B.`combo_min_price`
+            <![CDATA[ >= ]]> #{sysProd.minComboMinPrice}
+        </if>
+        <if test="sysProd.maxComboMinPrice != null and sysProd.maxComboMinPrice != 0 ">AND B.`combo_min_price`
+            <![CDATA[ < ]]> #{sysProd.maxComboMinPrice}
+        </if>
+        <if test="sysProd.shopName != null and sysProd.shopName != '' ">AND E.`name` like concat('%',
+            #{sysProd.shopName}, '%')
+        </if>
+        <if test="sysProd.joinShopMainpage != null and sysProd.joinShopMainpage != '' ">AND A.`join_shop_mainpage`=#{sysProd.joinShopMainpage}</if>
+        <if test="sysProd.businessType != null and sysProd.businessType != '' ">AND F.`business_type`=#{sysProd.businessType}</if>
+        order by A.`gmt_create` desc
+    </select>
+</mapper>

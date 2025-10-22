@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sysmerchat.coupon.mapper.PlatformCouponMapper">
+
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.coupon.module.vo.CouponPageVO">
+        select A.*
+        from t_mmdm_coupon A
+        where A.coupon_type = '3' AND A.flag = '0'
+        <if test="platformCoupon.id != null and platformCoupon.id != 0 ">AND A.`id`=#{platformCoupon.id}</if>
+        <if test="platformCoupon.name != null and platformCoupon.name != '' ">AND A.`name` like concat('%', #{platformCoupon.name}, '%')</if>
+        <if test="platformCoupon.couponStatus != null and platformCoupon.couponStatus != '' ">AND A.`coupon_status`=#{platformCoupon.couponStatus}</if>
+        <if test="platformCoupon.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{platformCoupon.startDate}</if>
+        <if test="platformCoupon.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{platformCoupon.endDate}</if>
+        order by A.gmt_create  <if test="platformCoupon.orderByGmtCreate != null and platformCoupon.orderByGmtCreate != ''  "> ${platformCoupon.orderByGmtCreate} </if>
+    </select>
+</mapper>

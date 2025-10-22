@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.sys.system.mapper.UserMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.sys.system.module.vo.UserVO">
+        select distinct A.*
+        from t_sys_user A
+        left join t_sys_user_relate B on A.id = B.user_id
+        <where>
+        <if test="user.number != null and user.number != '' ">and A.number = #{orderAfterSale.number}</if>
+        <if test="user.name != null and user.name != '' ">and A.name = #{orderAfterSale.name}</if>
+        <if test="user.phone != null and user.phone != '' ">and A.phone = #{orderAfterSale.phone}</if>
+        <if test="user.email != null and user.email != '' ">and A.email = #{orderAfterSale.email}</if>
+        <if test="user.isSuper != null and user.isSuper != '' ">and A.is_super = #{orderAfterSale.isSuper}</if>
+        <if test="user.isSysuser != null and user.isSysuser != '' ">and A.is_sysuser = #{orderAfterSale.isSysuser}</if>
+        <if test="user.orgId != null and user.orgId != '' ">and A.org_id = #{orderAfterSale.orgId}</if>
+        <if test="user.dataStatus != null and user.dataStatus != '' ">and A.data_status = #{orderAfterSale.dataStatus}</if>
+        <if test="user.relateTypeList != null and user.relateTypeList.size > 0 ">AND B.relate_type in
+            <foreach collection="user.relateTypeList" item="relateType" index="idx" open="(" separator="," close=")">
+                #{relateType}
+            </foreach>
+        </if>
+        </where>
+
+    </select>
+</mapper>

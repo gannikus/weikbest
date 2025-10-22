@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.shop.mapper.ShopMapper">
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.shop.module.vo.ShopListVO">
+        select A.*, B.wx_pay_mch_id, B.wx_pay_api_cert_serial_no, B.wx_pay_mch_effective_time, B.wx_pay_mch_expire_time,
+        B.is_add_receive, B.wx_platform_serial_no, B.wx_platform_expire_time,
+        C.name business_name, C.business_type, C.is_super,
+        D.id busi_user_id, D.name busi_user_name, D.phone busi_phone
+        from t_mmdm_shop A
+        left join t_mmdm_shop_third B on A.id = B.id
+        left join t_mmdm_business C on A.business_id = C.id
+        left join t_mmdm_busi_user D on A.business_id = D.business_id
+        where A.flag = '0' AND C.flag = '0' AND D.flag = '0' AND D.is_main_user = '1'
+        <if test="shop.businessId != null and shop.businessId != 0 ">AND A.`business_id`=#{shop.businessId}</if>
+        <if test="shop.number != null and shop.number != '' ">AND A.`number`=#{shop.number}</if>
+        <if test="shop.name != null and shop.name != '' ">AND A.`name`=#{shop.name}</if>
+        <if test="shop.isBrand != null and shop.isBrand != '' ">AND A.`is_brand`=#{shop.isBrand}</if>
+        <if test="shop.contact != null and shop.contact != '' ">AND A.`contact`=#{shop.contact}</if>
+        <if test="shop.companyName != null and shop.companyName != '' ">AND A.`company_name`=#{shop.companyName}</if>
+        <if test="shop.shopType != null and shop.shopType != '' ">AND A.`shop_type`=#{shop.shopType}</if>
+        <if test="shop.tradeType != null and shop.tradeType != '' ">AND A.`trade_type`=#{shop.tradeType}</if>
+        <if test="shop.dataStatus != null and shop.dataStatus != '' ">AND A.`data_status`=#{shop.dataStatus}</if>
+        <if test="shop.startDate != null  ">AND A.`gmt_create` <![CDATA[ >= ]]> #{shop.startDate}</if>
+        <if test="shop.endDate != null  ">AND A.`gmt_create` <![CDATA[ < ]]> #{shop.endDate}</if>
+        <if test="shop.wxPayMchId != null and shop.wxPayMchId != '' ">AND B.`wx_pay_mch_id`= #{shop.wxPayMchId}</if>
+        <if test="shop.wxPayMchExpireTime != null  ">AND B.`wx_pay_mch_effective_time` <![CDATA[ <= ]]>
+            #{shop.wxPayMchExpireTime}
+        </if>
+        <if test="shop.wxPlatformExpireTime != null  ">AND B.`wx_pay_mch_expire_time` <![CDATA[ <= ]]>
+            #{shop.wxPlatformExpireTime}
+        </if>
+        <if test="shop.businessType != null and shop.businessType != ''  ">AND C.`business_type` =#{shop.businessType}
+        </if>
+        <if test="shop.busiUserId != null and shop.busiUserId != 0  ">AND D.`id` =#{shop.busiUserId}</if>
+        <if test="shop.busiUserName != null and shop.busiUserName != ''  ">AND D.`name` like concat('%',
+            #{shop.busiUserName}, '%')
+        </if>
+        <if test="shop.busiPhone != null and shop.busiPhone != ''  ">AND D.`phone` =#{shop.busiPhone}</if>
+    </select>
+
+</mapper>

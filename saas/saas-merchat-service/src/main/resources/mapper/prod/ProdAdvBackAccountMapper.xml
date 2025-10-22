@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.prod.mapper.ProdAdvBackAccountMapper">
+
+    <delete id="deleteByProdId" parameterType="java.lang.Long">
+        DELETE FROM t_mmdm_prod_adv_back_account WHERE id = #{prodId}
+    </delete>
+
+    <update id="updateByProdId" parameterType="com.weikbest.pro.saas.merchat.prod.entity.ProdAdvBackAccount">
+        UPDATE
+            t_mmdm_prod_adv_back_account
+        SET
+            back_ratio = #{backRatio}
+        WHERE
+            id = #{id}
+    </update>
+
+</mapper>

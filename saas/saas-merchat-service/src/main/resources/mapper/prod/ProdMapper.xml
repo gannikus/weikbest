@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikbest.pro.saas.merchat.prod.mapper.ProdMapper">
+
+    <select id="queryPageCommodity" resultType="com.weikbest.pro.saas.merchat.prod.module.dto.AppProdDTO">
+        select *
+        from (select DISTINCT p.id,pt.show_img,pp.prod_combo_id,pp.combo_min_price,pp.combo_min_standard_price, p.name,p.tips,p.sales,p.prod_ord,p.goods_type
+        from t_mmdm_applet_prod_category_relate pr
+        left join t_mmdm_prod p on pr.prod_id = p.id
+        left join t_mmdm_prod_price pp on p.id = pp.id
+        left join t_mmdm_prod_theme pt on p.id = pt.id
+        left join t_mmdm_business bs on p.business_id = bs.id
+        LEFT JOIN t_mmdm_prod_binding_applet ba ON pr.prod_id = ba.prod_id
+        where p.prod_status = '1' and p.flag = '0'
+        <if test="name != null and name  != '' ">and p.name like '%${name}%'</if>
+        <if test="appId != null and appId  != '' ">AND (ba.app_id = #{appId} and ba.category_id = #{semCategotyId})</if>
+        <if test="semCategotyId != null and semCategotyId  != '' ">and pr.applet_prod_categoty_id = #{semCategotyId}</if>
+        ) t
+        order by t.prod_ord desc
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryPageCommodityByShopId" resultType="com.weikbest.pro.saas.merchat.prod.module.dto.AppProdDTO">
+        select p.id,pt.show_img,pp.prod_combo_id,pp.combo_min_price,pp.combo_min_standard_price,
+        p.name,p.tips,p.sales,p.goods_type
+        from t_mmdm_prod p
+        left join t_mmdm_prod_price pp on p.id = pp.id
+        left join t_mmdm_prod_theme pt on p.id = pt.id
+        where p.prod_status = '1' and p.flag = '0' and p.join_shop_mainpage = '1'
+        <if test="shopId != null and shopId != '' ">and p.shop_id = #{shopId}</if>
+        <if test="recommend != null and recommend == '1'.toString() ">order by pp.combo_min_price asc</if>
+        <if test="recommend != null and recommend == '2'.toString() ">order by pp.combo_min_price desc</if>
+        <if test="recommend != null and recommend == '3'.toString() ">order by p.gmt_create desc</if>
+        <if test="recommend != null and recommend == '4'.toString() ">order by p.sales desc</if>
+        <if test="recommend == null ">order by p.prod_ord desc</if>
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryPageCommodityByCouponId" resultType="com.weikbest.pro.saas.merchat.prod.module.dto.AppProdDTO">
+        select DISTINCT p.id,pt.show_img,pp.prod_combo_id,pp.combo_min_price,pp.combo_min_standard_price,
+        p.name,p.tips,p.sales
+        from t_mmdm_prod p
+         left join t_mmdm_prod_price pp on p.id = pp.id
+         left join t_mmdm_prod_theme pt on p.id = pt.id
+         LEFT JOIN t_mmdm_coupon_prod_entry cpe on p.id = cpe.prod_id
+        where p.prod_status = '1' and p.flag = '0'
+        <if test="couponType != null and couponType == '3'.toString() "> and cpe.id = #{couponId} </if>
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="queryPageProdsByName" resultType="java.lang.Long">
+        select DISTINCT p.id from t_mmdm_prod p
+        LEFT JOIN t_mmdm_applet_prod_category_relate pc
+        ON pc.prod_id = p.id
+        where p.prod_status = '1' and p.flag = '0'
+        <if test="name != null and name  != '' ">and p.name like '%${name}%'</if>
+        LIMIT ${start},${limit};
+    </select>
+
+
+    <select id="queryPage" resultType="com.weikbest.pro.saas.merchat.prod.module.vo.ProdListVO">
+        <!-- select A.id, A.category_id, A.name, C.show_img, B.combo_min_price, A.sales, A.prod_status, A.prod_ord, A.join_shop_mainpage, A.modifier, A.gmt_modified -->
+        select A.id,
+        A.business_id,
+        A.shop_id,
+        A.category_id,
+        A.brand_id,
+        A.goods_type,
+        A.number,
+        A.name,
+        A.tips,
+        A.prod_ord,
+        A.sales,
+        A.safeguard,
+        A.prod_status,
+        A.join_shop_mainpage,
+        A.description,
+        A.data_status,
+        A.flag,
+        A.creator,
+        A.modifier,
+        A.gmt_create,
+        A.gmt_modified,
+        A.shopping_prod_id,
+        A.shopping_combo_id,
+        C.show_img,
+        B.combo_min_price,
+        (select mb.name from t_mmdm_business mb where mb.id=A.business_id) businessName,
+        (select ms.name from t_mmdm_shop ms where ms.id=A.shop_id) shopName
+        from t_mmdm_prod A
+        left join t_mmdm_prod_price B on A.id = B.id
+        left join t_mmdm_prod_theme C on A.id = C.id
+        where A.flag = '0' and A.data_status = '1'
+        <if test="prod.id != null and prod.id != 0 ">AND A.`id`=#{prod.id}</if>
+        <if test="prod.businessId != null and prod.businessId != 0 ">AND A.`business_id`=#{prod.businessId}</if>
+        <if test="prod.shopId != null and prod.shopId != 0 ">AND A.`shop_id`=#{prod.shopId}</if>
+        <if test="prod.number != null and prod.number != '' ">AND A.`number`=#{prod.number}</if>
+        <if test="prod.name != null and prod.name != '' ">AND A.`name` like concat('%', #{prod.name}, '%')</if>
+        <if test="prod.tips != null and prod.tips != '' ">AND A.`tips` like concat('%', #{prod.tips}, '%')</if>
+        <if test="prod.prodStatus != null and prod.prodStatus != '' ">AND A.`prod_status`=#{prod.prodStatus}</if>
+        <if test="prod.categoryId != null and prod.categoryId != 0 ">AND A.`category_id`=#{prod.categoryId}</if>
+        <if test="prod.goodsType != null and prod.goodsType != 0 ">AND A.`goods_type`=#{prod.goodsType}</if>
+        <if test="prod.startDate != null ">AND A.`gmt_create` <![CDATA[ >= ]]>
+            #{prod.startDate}
+        </if>
+        <if test="prod.endDate != null ">AND A.`gmt_create` <![CDATA[ < ]]> #{prod.endDate}</if>
+        <if test="prod.ids != null and prod.ids.size > 0 ">AND A.`id` in
+            <foreach collection="prod.ids" item="prodId" index="idx" open="(" close=")" separator=",">
+                #{prodId}
+            </foreach>
+        </if>
+        order by A.`gmt_create` desc
+    </select>
+    <select id="queryPageCommodityByShopIdAndAggregationPage"
+            resultType="com.weikbest.pro.saas.merchat.prod.module.dto.AppProdDTO">
+        select p.id,pt.show_img,pp.prod_combo_id,pp.combo_min_price,pp.combo_min_standard_price,
+        p.name,p.tips,p.sales,p.goods_type
+        from t_mmdm_prod p
+        left join t_mmdm_prod_price pp on p.id = pp.id
+        left join t_mmdm_prod_theme pt on p.id = pt.id
+        where p.prod_status = '1' and p.flag = '0' and p.join_shop_mainpage = '1'
+        <if test="shopId != null and shopId != '' ">and p.shop_id = #{shopId}</if>
+        <if test="recommend != null and recommend == '1'.toString() ">order by pp.combo_min_price asc</if>
+        <if test="recommend != null and recommend == '2'.toString() ">order by pp.combo_min_price desc</if>
+        <if test="recommend != null and recommend == '3'.toString() ">order by p.gmt_create desc</if>
+        <if test="recommend != null and recommend == '4'.toString() ">order by p.sales desc</if>
+        <if test="recommend == null ">order by p.prod_ord desc</if>
+        LIMIT ${start},${limit};
+    </select>
+
+    <select id="getByProdId"
+            resultType="com.weikbest.pro.saas.merchat.prod.module.dto.AppProdDTO">
+        select p.id,pt.show_img,pp.prod_combo_id,pp.combo_min_price,pp.combo_min_standard_price,
+        p.name,p.tips,p.sales,p.goods_type
+        from t_mmdm_prod p
+        left join t_mmdm_prod_price pp on p.id = pp.id
+        left join t_mmdm_prod_theme pt on p.id = pt.id
+        where p.prod_status = '1' and p.flag = '0'
+        and p.id=#{id}
+    </select>
+
+
+    <select id="getSlideFloorByIds" parameterType="java.lang.Long" resultType="com.weikbest.pro.saas.merchat.prod.module.qo.SlideFloorQO">
+        SELECT
+            p.id,
+            s.ad_links_name,
+            f.success_pay_back
+        FROM
+            t_mmdm_prod p
+        LEFT JOIN t_mmdm_prod_left_slide s ON p.id = s.id
+        LEFT JOIN t_mmdm_prod_dec_floor f ON p.id = f.id
+        WHERE
+                p.id IN
+        <foreach item="id" collection="ids" separator="," open="(" close=")" index="">
+            #{id}
+        </foreach>
+    </select>
+
+
+    <select id="getShoppingList" resultType="com.weikbest.pro.saas.merchat.prod.module.vo.ProdShoppingListVo" >
+        SELECT
+              p.id
+            , p.name
+            , p.tips
+            , prod_ord
+            , p.sales
+            , p.prod_status
+            , p.description
+            , p.data_status
+            , p.prod_selling_point
+            , p.goods_type
+            , p.set_meal_type
+            , t.show_img
+            , b.combo_min_price
+        FROM
+            t_mmdm_prod p
+        LEFT JOIN
+            t_mmdm_prod_theme t ON p.id = t.id
+        LEFT JOIN
+            t_mmdm_prod_price b on p.id = b.id
+        WHERE
+            p.flag = '0'
+            AND p.data_status = '1'
+        <if test="prod.id != null and prod.id != 0 ">AND p.`id`=#{prod.id}</if>
+        <if test="prod.businessId != null and prod.businessId != 0 ">AND p.`business_id`=#{prod.businessId}</if>
+        <if test="prod.shopId != null and prod.shopId != 0 ">AND p.`shop_id`=#{prod.shopId}</if>
+        <if test="prod.number != null and prod.number != '' ">AND p.`number`=#{prod.number}</if>
+        <if test="prod.name != null and prod.name != '' ">AND p.`name` like concat('%', #{prod.name}, '%')</if>
+        <if test="prod.tips != null and prod.tips != '' ">AND p.`tips` like concat('%', #{prod.tips}, '%')</if>
+        <if test="prod.prodStatus != null and prod.prodStatus != '' ">AND p.`prod_status`=#{prod.prodStatus}</if>
+        <if test="prod.categoryId != null and prod.categoryId != 0 ">AND p.`category_id`=#{prod.categoryId}</if>
+        <if test="prod.goodsType != null and prod.goodsType != 0 ">AND p.`goods_type`=#{prod.goodsType}</if>
+        <if test="prod.startDate != null ">AND p.`gmt_create` <![CDATA[ >= ]]> #{prod.startDate} </if>
+        <if test="prod.endDate != null ">AND p.`gmt_create` <![CDATA[ < ]]> #{prod.endDate}</if>
+        order by
+        <if test="prod.followShoppingId != null "> CASE WHEN ( p.id = #{prod.followShoppingId} ) THEN 0 ELSE 1 END , </if>
+             p.`gmt_create` desc
+    </select>
+
+
+    <update id="IdRelevancyShoppingId" >
+        update t_mmdm_prod set shopping_prod_id = #{shoppingId} , shopping_combo_id = #{shoppingComboId} , gmt_modified = NOW() where id = #{id}
+    </update>
+
+    <update id="updateByShoppingComboIds" parameterType="java.lang.Long">
+        UPDATE t_mmdm_prod SET shopping_combo_id = #{newComboId} WHERE shopping_combo_id in
+        <foreach item="comboId" collection="comboIds" separator="," open="(" close=")" index="">
+            #{comboId}
+        </foreach>
+    </update>
+
+    <update id="removeShoppingId" parameterType="java.lang.Long">
+        UPDATE t_mmdm_prod SET shopping_prod_id = NULL , shopping_combo_id = NULL WHERE shopping_prod_id = #{id}
+    </update>
+
+    <update id="removeShoppingIds" parameterType="java.lang.Long">
+        UPDATE t_mmdm_prod SET shopping_prod_id = NULL , shopping_combo_id = NULL WHERE shopping_prod_id in
+        <foreach item="id" collection="ids" separator="," open="(" close=")" index="">
+            #{id}
+        </foreach>
+    </update>
+</mapper>
